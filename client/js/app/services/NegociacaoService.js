@@ -48,21 +48,38 @@ class NegociacaoService{
 
 	}
 
-	obterNegociacoes(){
-		
-		return Promise.all(
-				[this.obterNegociacoesDaSemana(),
+
+		obterNegociacoes() {
+        
+			return Promise.all([
+				this.obterNegociacoesDaSemana(),
 				this.obterNegociacoesDaSemanaAnterior(),
-				this.obterNegociacoesDaSemanaRetrasada()]
-				)
-				.then(negociacoes => {
-						negociacoes
-							.reduce((dados, periodo) => dados.concat(periodo), []);
-							return negociacoes;
-						})
-				.catch(erro => {
-					throw new Error(erro);
-				});
+				this.obterNegociacoesDaSemanaRetrasada()
+			]).then(periodos => {
+	
+				let negociacoes = periodos
+					.reduce((dados, periodo) => dados.concat(periodo), [])
+					.map(dado => new Negociacao(new Date(dado.data), dado.quantidade, dado.valor ));
+	
+				return negociacoes;
+			}).catch(erro => {
+				throw new Error(erro);
+			});
+		} 
+
+		cadastra(negociacao){
+
+
+			return ConnectionFactory
+			.getConnection()
+			.then(connection => new NegociacaoDao(connection))
+			.then(dao => dao.adiciona(negociacao))
+			.then(() => 'Negociacao adicionada com sucesso')
+			.catch(erro => {
+						console.log(erro);
+						throw Error('Não foi possível adicionar a negociação');
+			});
 		}
 
 }
+

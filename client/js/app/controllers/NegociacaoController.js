@@ -24,10 +24,17 @@ class NegociacaoController {
 		//Para não sujar o modelo MVC e manter o controller e a view intocada pelo model usei o padrão proxy 
 
 		this._listaNegociacoes = new Bind(new ListaNegociacoes(), new NegociacoesView($("#negociacoesView")), 'adiciona', 'apaga', 'ordena', 'inverteOrdem');
-
+		this._negociacaoService = new NegociacaoService();
 
 		this._mensagem = new Bind(new Mensagem(), new MensagemView($("#mensagemView")), 'texto');
 
+		this._init();
+
+	}
+	
+	
+	_init(){
+		
 		ConnectionFactory
 			.getConnection()
 			.then(connection => new NegociacaoDao(connection))
@@ -39,6 +46,10 @@ class NegociacaoController {
 				console.log(erro);
 				reject('Não foi possível listar as negociações.');
 			});
+
+		setInterval(() =>{
+			this.importaNegociacoes();
+		}, 3000);
 	}
 
 
@@ -46,41 +57,37 @@ class NegociacaoController {
 		
 		event.preventDefault();
 
-		ConnectionFactory
-			.getConnection()
-			.then(connection => {
-				
-				let negociacao = this._criarNegociacao();
-				new NegociacaoDao(connection)
-					.adiciona(negociacao)
-					.then(()=>{
-						
-						this._listaNegociacoes.adiciona(negociacao);
-						this._limpaFormulario();
-						this._mensagem.texto = 'Negociacao adicionada com sucesso';
-					})
-			}).catch(erro => this._mensagem.texto = erro);
+		let negociacao = this._criarNegociacao();
+
+		this._negociacaoService.cadastra(negociacao)
+			.then(mensagem => {
+				this._listaNegociacoes.adiciona(negociacao);
+				this._limpaFormulario();
+				this._mensagem.texto = mensagem;
+			})
+			.catch(erro => this._mensagem.texto = erro);
 	
 	}
 
 
 
 	importaNegociacoes(){
+
 		console.log('Entrei na função importaNegociacoes');
 		
-		let negociacaoService = new NegociacaoService();
-
-		negociacaoService
+		let service = new NegociacaoService();
+		service
 			.obterNegociacoes()
-			.then(negociacoes => {
-          			negociacoes.forEach(negociacao => this._listaNegociacoes.adiciona(negociacao));
-         	 		this._mensagem.texto = 'Negociações do período importadas com sucesso';
-        		})
-			.catch(error => this._mensagem.texto = error);
-
-		
-
-
+			.then(negociacoes =>
+				negociacoes.filter(negociacao =>
+						!this._listaNegociacoes.negociacoes.some(negociacaoExistente =>
+							JSON.stringify(negociacao) == JSON.stringify(negociacaoExistente)
+						)))
+			.then(negociacoes => negociacoes.forEach(negociacao => {
+				this._listaNegociacoes.adiciona(negociacao);
+				this._mensagem.texto = 'Negociações do período importadas'
+			}))
+			.catch(erro => this._mensagem.texto = erro);
 	}
 
 	_criarNegociacao(){
