@@ -35,17 +35,17 @@ class NegociacaoController {
 	
 	_init(){
 		
-		ConnectionFactory
-			.getConnection()
-			.then(connection => new NegociacaoDao(connection))
-			.then(dao => dao.listaTodos())
+		this._negociacaoService
+			.lista()
 			.then(negociacoes => 
 				negociacoes.forEach(negociacao => 
 					this._listaNegociacoes.adiciona(negociacao)))
 			.catch(erro => {
 				console.log(erro);
-				reject('Não foi possível listar as negociações.');
+				this._mensagem.texto = erro;
 			});
+
+	
 
 		setInterval(() =>{
 			this.importaNegociacoes();
@@ -74,15 +74,9 @@ class NegociacaoController {
 	importaNegociacoes(){
 
 		console.log('Entrei na função importaNegociacoes');
-		
-		let service = new NegociacaoService();
-		service
-			.obterNegociacoes()
-			.then(negociacoes =>
-				negociacoes.filter(negociacao =>
-						!this._listaNegociacoes.negociacoes.some(negociacaoExistente =>
-							JSON.stringify(negociacao) == JSON.stringify(negociacaoExistente)
-						)))
+
+		this._negociacaoService
+			.importa(this._listaNegociacoes.negociacoes)
 			.then(negociacoes => negociacoes.forEach(negociacao => {
 				this._listaNegociacoes.adiciona(negociacao);
 				this._mensagem.texto = 'Negociações do período importadas'
@@ -107,15 +101,16 @@ class NegociacaoController {
 
 	apaga(){
 
-		ConnectionFactory
-			.getConnection()
-			.then(connection => new NegociacaoDao(connection))
-			.then(dao => dao.apagaTodos())
+		this._negociacaoService
+			.apaga()
 			.then(mensagem => {
 				this._mensagem.texto = mensagem;
 				this._listaNegociacoes.esvazia();
 			})
-			.catch(error => this._mensagem.texto = error);
+			.catch(error => {
+				console.log(erro)
+				this._mensagem.texto = error;
+			});
 
 	}
 
