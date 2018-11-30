@@ -1,30 +1,36 @@
-class DateHelper{
+'use strict';
 
-	constructor(){
-		throw new Error('Esta classe não pode ser instanciada');
-	}
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	static dataParaTexto(data){
-		
-		//Recurso de template String
-		return `${data.getDate()}/${data.getMonth()+1}/${data.getFullYear()}`;
-	}
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-	static textoParaData(texto){
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-		/*A função Spread Operator "..." permite que os elementos de 
-		um array, sejam trasnformados em parâmetros no construtor
-		nesse caso de new Date os valores que esão entre '-' que já foram
-		transformados em array serão transformados em parâmetros ano, mês e dia*/
-		console.log(texto);
-		if(!/\d{2}\/\d{2}\/\d{4}/.test(texto)) 
-			throw new Error('Deve estar no formato dd/mm/aaaa');
-		
-		return new Date(...texto
-					.split('\/')
-					/*Para o mês a contagem é a partir de 0, 
-					por isso subtrai-se o mod 2 do segundo parâmetro*/
-					.reverse()
-					.map((item, indice) =>  item - indice % 2));
-	}
-}
+var DateHelper = function () {
+    function DateHelper() {
+        _classCallCheck(this, DateHelper);
+
+        throw new Error('Esta classe não pode ser instanciada');
+    }
+
+    _createClass(DateHelper, null, [{
+        key: 'dataParaTexto',
+        value: function dataParaTexto(data) {
+
+            return data.getDate() + '/' + (data.getMonth() + 1) + '/' + data.getFullYear();
+        }
+    }, {
+        key: 'textoParaData',
+        value: function textoParaData(texto) {
+
+            if (!/\d{2}\/\d{2}\/\d{4}/.test(texto)) throw new Error('Deve estar no formato dd/mm/aaaa');
+
+            return new (Function.prototype.bind.apply(Date, [null].concat(_toConsumableArray(texto.split('/').reverse().map(function (item, indice) {
+                return item - indice % 2;
+            })))))();
+        }
+    }]);
+
+    return DateHelper;
+}();
+//# sourceMappingURL=DateHelper.js.map

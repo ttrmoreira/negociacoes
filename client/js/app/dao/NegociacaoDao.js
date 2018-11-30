@@ -1,108 +1,94 @@
-class NegociacaoDao{
+'use strict';
 
-    constructor(connection){
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var NegociacaoDao = function () {
+    function NegociacaoDao(connection) {
+        _classCallCheck(this, NegociacaoDao);
+
         this._connection = connection;
-        this._store = 'negociacoes'
+        this._store = 'negociacoes';
     }
 
+    _createClass(NegociacaoDao, [{
+        key: 'adiciona',
+        value: function adiciona(negociacao) {
+            var _this = this;
 
-    adiciona(negociacao){
-        
-        return new Promise((resolve, reject) => {
+            return new Promise(function (resolve, reject) {
 
+                var request = _this._connection.transaction([_this._store], 'readwrite').objectStore(_this._store).add(negociacao);
 
-            let request = this._connection
-                            .transaction([this._store],'readwrite')
-                            .objectStore(this._store)
-                            .add(negociacao);
-  
-              request.onsuccess = e => {
-  
-                resolve();
-              };
-  
-              request.onerror = e => {
-  
-                console.log(e.target.error);
-                reject('Não foi possível adicionar a negociação');
-              };
-        });
-    }
+                request.onsuccess = function (e) {
 
+                    resolve();
+                };
 
-    listaTodos(){
+                request.onerror = function (e) {
 
-        return new Promise ((resolve, reject) => {
+                    console.log(e.target.error);
+                    reject('Não foi possível adicionar a negociação');
+                };
+            });
+        }
+    }, {
+        key: 'listaTodos',
+        value: function listaTodos() {
+            var _this2 = this;
 
+            return new Promise(function (resolve, reject) {
 
-            let negociacoes = [];
+                var cursor = _this2._connection.transaction([_this2._store], 'readwrite').objectStore(_this2._store).openCursor();
 
-            /* O cursor é o responsável por passear pelos dados da Object Store. 
-            Ele tem um ponteiro para o primeiro, segundo e os demais elementos 
-            ordenados. Sabemos que depois, ele chamará os elementos para cada 
-            item do banco. Se temos dez negociações, o onsuccess será chamado 
-            o mesmo número de vezes. E quando este evento é chamado 
-            em e.target.result, temos o ponteiro atual do cursor. No if, 
-            testaremos se o ponteiro existe, caso o resultado seja positivo, 
-            vamos pedir o dado para o ponteiro. */
+                var negociacoes = [];
 
-            let cursor = this._connection
-                            .transaction([this._store],'readwrite')
-                            .objectStore(this._store)
-                            .openCursor();
+                cursor.onsuccess = function (e) {
 
-            // 
-            cursor.onsuccess = e => {
+                    var atual = e.target.result;
 
-            	let atual = e.target.result;
+                    if (atual) {
 
-                 if(atual) {
+                        var dado = atual.value;
 
-                     let dado = atual.value;
-                     negociacoes.push(new Negociacao(dado._data, dado._quantidade, dado._valor));
-                     atual.continue();
+                        negociacoes.push(new Negociacao(dado._data, dado._quantidade, dado._valor));
 
-                 } else { 
+                        atual.continue();
+                    } else {
 
-                     // quando não há mais objects em nossa store.
-                     // Isso significa que já terminados de popular negociacoes
-                    resolve(negociacoes);
-                    console.log(negociacoes);
-                 }	
+                        resolve(negociacoes);
+                    }
+                };
 
-            };
+                cursor.onerror = function (e) {
 
-            cursor.onerror = e => {
-                console.log('Error:' + e.target.error.name);
-                reject('Não foi possível listar as negociações');
-            };
+                    console.log(e.target.error);
+                    reject('Não foi possível listar as negociações');
+                };
+            });
+        }
+    }, {
+        key: 'apagaTodos',
+        value: function apagaTodos() {
+            var _this3 = this;
 
+            return new Promise(function (resolve, reject) {
 
+                var request = _this3._connection.transaction([_this3._store], 'readwrite').objectStore(_this3._store).clear();
 
+                request.onsuccess = function (e) {
+                    return resolve('Negociações apagadas com sucesso');
+                };
 
+                request.onerror = function (e) {
+                    console.log(e.target.error);
+                    reject('Não foi possível apagar as negociações');
+                };
+            });
+        }
+    }]);
 
-
-        });
-    }
-
-    apagaTodos(){
-
-		return new Promise((resolve, reject)=>{
-
-
-            let request = this._connection
-            .transaction([this._store],'readwrite')
-            .objectStore(this._store)
-            .clear();
-
-            request.onsuccess = e => resolve('Negociações apagadas com sucesso');
-
-            request.onerror = e => {
-                console.log(e.target.error);
-                reject('Não foi possível apagar as negociações');
-            }
-
-
-		});
-	}
-}
+    return NegociacaoDao;
+}();
+//# sourceMappingURL=NegociacaoDao.js.map
