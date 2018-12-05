@@ -122,6 +122,7 @@ System.register(['../models/ListaNegociacoes', '../models/Mensagem', '../views/N
                     value: function apaga() {
                         var _this4 = this;
 
+                        console.log('Entrei em apagar');
                         this._service.apaga().then(function (mensagem) {
                             _this4._mensagem.texto = mensagem;
                             _this4._listaNegociacoes.esvazia();

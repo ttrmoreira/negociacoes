@@ -77,7 +77,7 @@ class NegociacaoController {
     }
     
     apaga() {
-        
+        console.log('Entrei em apagar');
         this._service
             .apaga()
             .then(mensagem => {

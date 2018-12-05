@@ -32,7 +32,7 @@ System.register([], function (_export, _context) {
                 };
             }();
 
-            Negociacao = function () {
+            _export("Negociacao", Negociacao = function () {
                 function Negociacao(data, quantidade, valor) {
                     _classCallCheck(this, Negociacao);
 
@@ -69,7 +69,9 @@ System.register([], function (_export, _context) {
                 }]);
 
                 return Negociacao;
-            }();
+            }());
+
+            _export("Negociacao", Negociacao);
         }
     };
 });
